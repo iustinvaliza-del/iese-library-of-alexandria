@@ -1,0 +1,207 @@
+#!/usr/bin/env node
+// @ts-check
+// kit login | collect [--dry] | upload | run   [--code <upload code>]
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
+import { collectWithClient, collect } from './lib/collect.mjs';
+import { makeClient, currentUser, enrolledCourses } from './lib/blackboard.mjs';
+import { selectCourses } from './lib/contract.mjs';
+import { fixtureClient } from './lib/fixture-client.mjs';
+import { knownCourseIds, uploadZip, DropError } from './lib/drop.mjs';
+import { loadState, saveState, makeProgress } from './lib/state.mjs';
+
+export { collect };
+
+const KIT_DIR = dirname(fileURLToPath(import.meta.url));
+const STATE_PATH = join(KIT_DIR, '.state.json');
+const OUT_DIR = join(KIT_DIR, 'output');
+const RECEIPT_PATH = join(KIT_DIR, 'receipt.txt');
+const progress = makeProgress(join(KIT_DIR, 'progress.json'));
+// Drop refusals that apply to every course, so the upload stops instead of trying the rest.
+const STOP_ALL = new Set(['bad_code', 'daily_limit']);
+
+function readConfig() {
+  const config = JSON.parse(readFileSync(join(KIT_DIR, 'kit.config.json'), 'utf-8'));
+  return { dropUrl: String(config.dropUrl || '').trim() };
+}
+
+async function knownIds(code) {
+  const { dropUrl } = readConfig();
+  if (!dropUrl || !code) return [];
+  try {
+    return await knownCourseIds(dropUrl, code);
+  } catch (e) {
+    if (e instanceof DropError && e.error === 'bad_code') {
+      throw new Error('The upload code was not accepted. Check the code in the message you were sent.');
+    }
+    throw e;
+  }
+}
+
+/** Course ids not to collect again: known to the library, or zipped by an earlier run. */
+function excludedIds(known) {
+  const state = loadState(STATE_PATH);
+  const done = Object.entries(state.courses)
+    .filter(([, c]) => c.upload_result === 'uploaded' || existsSync(c.zip))
+    .map(([id]) => id);
+  return [...new Set([...known, ...done])];
+}
+
+async function withBrowser(step, fn) {
+  const { openBlackboard } = await import('./lib/browser.mjs');
+  progress({ step, message: 'Opening the browser' });
+  const { browser, context } = await openBlackboard({
+    onWaiting: waiting => progress({
+      needs_friend: waiting,
+      message: waiting ? 'A browser window is open: sign in to Blackboard there' : 'Signed in',
+    }),
+  });
+  try {
+    return await fn(context);
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+async function stepLogin(context, known) {
+  progress({ step: 'login', message: 'Listing courses' });
+  const client = makeClient(context);
+  const user = await currentUser(client);
+  const courses = selectCourses(await enrolledCourses(client, user.id));
+  const skip = new Set(excludedIds(known));
+  console.log(`2nd-year courses found: ${courses.length}`);
+  for (const c of courses) {
+    console.log(`  ${skip.has(c.courseId) ? '[already shared or collected] ' : ''}${c.name} (${c.courseId})`);
+  }
+}
+
+async function stepCollect(context, known, { dry = false } = {}) {
+  progress({ step: 'collect', message: dry ? 'Dry run from the fixture' : 'Collecting courses' });
+  const client = dry ? fixtureClient() : makeClient(context);
+  const state = loadState(STATE_PATH);
+  const { results } = await collectWithClient(client, {
+    out: OUT_DIR,
+    known: dry ? [] : excludedIds(known),
+    dry,
+    onProgress: p => progress({ step: 'collect', ...p }),
+    onCourse: result => {
+      state.courses[result.course_id] = { ...result, upload: null, upload_result: null };
+      saveState(STATE_PATH, state);
+      console.log(`Zipped ${result.course_name}: ${result.files} files -> ${result.zip}`);
+    },
+  });
+  if (dry) {
+    for (const r of results) {
+      console.log(`${r.course_name} (${r.course_id}) -> folder "${r.folder}"`);
+      for (const f of r.files) console.log(`  + ${f.path}`);
+      for (const s of r.skipped) console.log(`  - ${s.path} (${s.reason})`);
+    }
+  }
+  console.log(`Courses ${dry ? 'that would be collected' : 'collected this run'}: ${results.length}`);
+}
+
+/** Returns true when every collected course is uploaded. */
+async function stepUpload(code) {
+  const { dropUrl } = readConfig();
+  if (!dropUrl) {
+    console.log(`Upload drop not configured yet; your zips are in ${OUT_DIR}`);
+    return true;
+  }
+  if (!code) throw new Error('Add --code <code>: the upload code from the message you were sent.');
+  const state = loadState(STATE_PATH);
+  let allDone = true;
+  for (const [courseId, entry] of Object.entries(state.courses)) {
+    if (entry.upload_result === 'uploaded') continue;
+    if (!existsSync(entry.zip)) {
+      entry.upload_result = 'not uploaded: zip file is missing, rerun collect';
+      allDone = false;
+      continue;
+    }
+    progress({ step: 'upload', course: entry.course_name, done: 0, total: entry.size, message: 'Uploading' });
+    try {
+      await uploadZip({
+        dropUrl, code, zipPath: entry.zip, courseId, sha256: entry.sha256, upload: entry.upload,
+        onState: up => { entry.upload = up; saveState(STATE_PATH, state); },
+        onProgress: p => progress({ step: 'upload', course: entry.course_name, ...p, message: 'Uploading' }),
+      });
+      entry.upload = null;
+      entry.upload_result = 'uploaded';
+    } catch (e) {
+      allDone = false;
+      entry.upload_result = `not uploaded: ${e instanceof DropError ? e.error : e.message}`;
+      if (e instanceof DropError && STOP_ALL.has(e.error)) {
+        saveState(STATE_PATH, state);
+        break;
+      }
+    }
+    saveState(STATE_PATH, state);
+  }
+  return allDone;
+}
+
+const mb = bytes => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+function writeReceipt() {
+  const { courses } = loadState(STATE_PATH);
+  const lines = ['IESE Alexandria kit: receipt', ''];
+  for (const c of Object.values(courses)) {
+    lines.push(`${c.course_name} (${c.course_id})`);
+    lines.push(`  files: ${c.files}, ${mb(c.bytes)} (zip ${mb(c.size)})`);
+    lines.push(`  upload: ${c.upload_result || 'not uploaded yet'}`);
+    if (c.skipped.length) lines.push(`  skipped ${c.skipped.length}:`);
+    for (const s of c.skipped) lines.push(`    ${s.path} (${s.reason})`);
+    lines.push('');
+  }
+  if (!Object.keys(courses).length) lines.push('No courses collected yet.');
+  const text = lines.join('\n');
+  writeFileSync(RECEIPT_PATH, text);
+  console.log(text);
+}
+
+async function main(argv) {
+  const { values, positionals } = parseArgs({
+    args: argv,
+    options: { code: { type: 'string' }, dry: { type: 'boolean' } },
+    allowPositionals: true,
+  });
+  const step = positionals[0];
+  const code = values.code || '';
+  let ok = true;
+  if (step === 'login') {
+    const known = await knownIds(code);
+    await withBrowser('login', context => stepLogin(context, known));
+  } else if (step === 'collect') {
+    if (values.dry) await stepCollect(null, [], { dry: true });
+    else {
+      const known = await knownIds(code);
+      await withBrowser('collect', context => stepCollect(context, known));
+    }
+  } else if (step === 'upload') {
+    ok = await stepUpload(code);
+    writeReceipt();
+  } else if (step === 'run') {
+    const known = await knownIds(code);
+    await withBrowser('collect', async context => {
+      await stepLogin(context, known);
+      await stepCollect(context, known);
+    });
+    ok = await stepUpload(code);
+    writeReceipt();
+  } else {
+    console.log('Usage: kit.mjs login | collect [--dry] | upload | run   [--code <upload code>]');
+    return 2;
+  }
+  progress({ step: 'done', needs_friend: false, message: ok ? 'Finished' : 'Finished with problems: see receipt.txt' });
+  return ok ? 0 : 1;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main(process.argv.slice(2)).then(code => { process.exitCode = code; }, e => {
+    // step stays as it was, so the reader knows which step to rerun.
+    progress({ needs_friend: false, message: `Failed: ${e.message}` });
+    console.error(`Failed: ${e.message}`);
+    process.exitCode = 1;
+  });
+}

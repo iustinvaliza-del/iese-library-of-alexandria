@@ -1,0 +1,7 @@
+node_modules/
+.node/
+output/
+.state.json
+progress.json
+receipt.txt
+*.tmp

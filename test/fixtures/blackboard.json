@@ -1,0 +1,58 @@
+{
+  "routes": {
+    "/users/me": { "id": "_100_1", "name": { "given": "Ana María", "family": "Example" } },
+    "/users/_100_1/courses": {
+      "results": [
+        { "courseId": "_1_1" },
+        { "courseId": "_2_1" },
+        { "courseId": "_3_1" },
+        { "courseId": "_4_1" }
+      ]
+    },
+    "/courses/_1_1": { "id": "_1_1", "name": "MBA 2027 - Clubs Management - TF" },
+    "/courses/_2_1": { "id": "_2_1", "name": "MBA 2027 - Corporate Finance - NRB" },
+    "/courses/_3_1": { "id": "_3_1", "name": "MBA 2027 - Class Community - TF", "organization": true },
+    "/courses/_4_1": { "id": "_4_1", "name": "MBA 2027 - Entrepreneurship: New Ventures 1 - TF" },
+
+    "/courses/_1_1/contents": {
+      "results": [
+        { "id": "c1", "title": "Course Syllabus", "contentHandler": { "id": "resource/x-bb-file" } },
+        { "id": "m", "title": "Materials", "contentHandler": { "id": "resource/x-bb-folder" } }
+      ]
+    },
+    "/courses/_1_1/contents/c1/attachments": { "results": [{ "id": "a1", "fileName": "Syllabus.pdf" }] },
+    "/courses/_1_1/contents/m/children": {
+      "results": [
+        { "id": "s1", "title": "Session 1: Understanding Your Reality.", "contentHandler": { "id": "resource/x-bb-folder" } }
+      ]
+    },
+    "/courses/_1_1/contents/s1/children": {
+      "results": [
+        { "id": "f1", "title": "Case", "contentHandler": { "id": "resource/x-bb-file" } },
+        { "id": "f2", "title": "Case again", "contentHandler": { "id": "resource/x-bb-file" } },
+        { "id": "f3", "title": "Video", "contentHandler": { "id": "resource/x-bb-file" } },
+        { "id": "f4", "title": "Workbook", "contentHandler": { "id": "resource/x-bb-file" } }
+      ]
+    },
+    "/courses/_1_1/contents/f1/attachments": { "results": [{ "id": "a2", "fileName": "Case.pdf" }] },
+    "/courses/_1_1/contents/f2/attachments": { "results": [{ "id": "a3", "fileName": "case.PDF" }, { "id": "a4", "fileName": "Case.pdf" }] },
+    "/courses/_1_1/contents/f3/attachments": { "results": [{ "id": "a5", "fileName": "Lecture.mp4" }] },
+    "/courses/_1_1/contents/f4/attachments": { "results": [{ "id": "a6", "fileName": "Numbers.xlsx" }] },
+
+    "/courses/_4_1/contents": {
+      "results": [
+        { "id": "g1", "title": "Reading", "contentHandler": { "id": "resource/x-bb-file" } }
+      ]
+    },
+    "/courses/_4_1/contents/g1/attachments": { "results": [{ "id": "b1", "fileName": "Reading.docx" }, { "id": "b2", "fileName": "Missing.pdf" }] }
+  },
+  "files": {
+    "/courses/_1_1/contents/c1/attachments/a1/download": "syllabus body",
+    "/courses/_1_1/contents/f1/attachments/a2/download": "case one",
+    "/courses/_1_1/contents/f2/attachments/a3/download": "case two",
+    "/courses/_1_1/contents/f2/attachments/a4/download": "case three",
+    "/courses/_1_1/contents/f3/attachments/a5/download": "video bytes",
+    "/courses/_1_1/contents/f4/attachments/a6/download": "workbook bytes",
+    "/courses/_4_1/contents/g1/attachments/b1/download": "reading body"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "iese-alexandria-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Download your own IESE Blackboard course materials, zip each course and share it with a classmate's course library.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "playwright-core": "1.64.1"
+  }
+}
