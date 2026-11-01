@@ -6,7 +6,7 @@ The person you are helping is an IESE MBA student, usually not technical. They w
 
 - It downloads the person's own 2nd-year course materials from IESE Blackboard (course name ending in " - TF"): case PDFs, readings, slides, spreadsheets, images. Only these file types: see `allowlist.json`. Videos and other types are listed as skipped, not downloaded.
 - It never reads grades, submissions, class lists, announcements or messages.
-- It zips each course and uploads the zips to Iustin's private course library on Google Drive.
+- It zips each course and uploads the zips to Radu's private course library on Google Drive, until he rebuilds the library for everyone.
 - Case PDFs usually carry the reader's name as a watermark, so the person's name travels with those files.
 - Nothing else on the computer is read. The person's Blackboard password is typed only into the Blackboard sign-in page in the browser window; the kit does not read it and saves no login.
 - The person can stop at any time: close the browser window, or ask you to stop the run. An unfinished upload is not kept on the other side, and running the kit again picks up where it stopped.

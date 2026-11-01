@@ -1,6 +1,6 @@
 # IESE Alexandria kit
 
-This kit copies your own 2nd-year IESE course materials from Blackboard into one zip file per course and uploads the zips to Iustin's private course library on Google Drive. Claude Code does the work; you only sign in to Blackboard when a browser window asks you to.
+This kit copies your own 2nd-year IESE course materials from Blackboard into one zip file per course and uploads the zips to Radu's private course library on Google Drive, until he rebuilds the library for everyone. Claude Code does the work; you only sign in to Blackboard when a browser window asks you to.
 
 ## What gets shared
 

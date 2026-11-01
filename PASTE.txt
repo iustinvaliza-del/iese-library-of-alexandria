@@ -1,10 +1,10 @@
 Please help me share my IESE 2nd-year course materials with a classmate's course library, using the IESE Alexandria kit. No git is needed.
 
 1. Download the kit and unpack it in my Desktop folder:
-   - Windows (PowerShell): cd "$HOME\Desktop"; curl.exe -L -o iese-alexandria-kit.zip "<REPO_ZIP_URL>"; tar.exe -xf iese-alexandria-kit.zip
+   - Windows (PowerShell): cd "$HOME\Desktop"; curl.exe -L -o iese-library-of-alexandria.zip "https://github.com/iustinvaliza-del/iese-library-of-alexandria/archive/refs/heads/main.zip"; tar.exe -xf iese-library-of-alexandria.zip
      (use Windows' own tar, C:\Windows\System32\tar.exe; the tar inside Git Bash cannot open zip files)
-   - Mac (Terminal): cd ~/Desktop && curl -L -o iese-alexandria-kit.zip "<REPO_ZIP_URL>" && unzip -o iese-alexandria-kit.zip
-2. Open the folder it created (its name starts with iese-alexandria-kit), read CLAUDE.md there and follow it.
+   - Mac (Terminal): cd ~/Desktop && curl -L -o iese-library-of-alexandria.zip "https://github.com/iustinvaliza-del/iese-library-of-alexandria/archive/refs/heads/main.zip" && unzip -o iese-library-of-alexandria.zip
+2. Open the folder it created (iese-library-of-alexandria-main), read CLAUDE.md there and follow it.
 3. My upload code is <CODE>
 
 If I am not signed in to Blackboard, a browser window will open and I will sign in there.
