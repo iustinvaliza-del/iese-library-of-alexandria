@@ -25,7 +25,7 @@ Work from this folder (the folder holding this file). Do not read or change file
 
    It must end with `Setup finished.` If it fails, run it once more; if it fails again, show the person the last lines of its output.
 
-2. **Run** with the upload code the person was given, as a **background** command (`run_in_background`), because a run lasts longer than the 10-minute limit of a normal command:
+2. **Run** with the upload code the person was given (Radu sends it with the link; if they have not given it to you, ask them for it), as a **background** command (`run_in_background`), because a run lasts longer than the 10-minute limit of a normal command:
    - Windows: `.node/node.exe kit.mjs run --code <code>`
    - Mac: `.node/bin/node kit.mjs run --code <code>`
 
