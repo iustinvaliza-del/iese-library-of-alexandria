@@ -35,6 +35,8 @@ Work from this folder (the folder holding this file). Do not read or change file
 
 4. **When the run ends**, show the person `receipt.txt`: per course, the number of files, the size, the skipped files with reasons, and whether the upload worked.
 
+5. **Clean up**, only when `progress.json` says `"all_uploaded": true` and the run has ended. Show the receipt first, since it is deleted too. Then go to the folder that holds this kit folder and delete this kit folder and the zip it was downloaded as. That removes everything the kit put on the computer, including the private Node.js and any Chromium it downloaded (kept in `.browsers` here). For example, on Windows: `cd "$HOME\Desktop"; Remove-Item -Recurse -Force "iese-library-of-alexandria-main", "iese-library-of-alexandria.zip"`; on a Mac: `cd ~/Desktop && rm -rf iese-library-of-alexandria-main iese-library-of-alexandria.zip`. Use the real names if you unpacked it elsewhere. Delete nothing else. If `all_uploaded` is `false`, keep everything, because the zips are needed for a rerun, and tell the person what is left to do.
+
 ## If something fails
 
 The command exits with a nonzero code and `progress.json` has a `message` starting with `Failed:`; `step` says which step was running. Rerun that step; work already done is skipped:
@@ -49,7 +51,7 @@ Messages you may see:
 - `not uploaded: daily_limit` in the receipt: the library takes no more uploads today; run `upload` again tomorrow.
 - `not uploaded: too_big`: that course is too large to upload this way; tell the person, the rest still goes through.
 - "Upload drop not configured yet": the kit was sent before the library was ready. The zips are kept in the `output` folder; tell the person and stop there.
-- If the browser does not open at all, the kit downloads its own copy of Chromium and tries again; let it finish.
+- If the browser does not open at all, the kit downloads its own copy of Chromium into `.browsers` in this folder and tries again; let it finish.
 
 After three failed attempts at the same step, stop and show the person the error message.
 

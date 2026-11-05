@@ -141,6 +141,11 @@ async function stepUpload(code) {
   return allDone;
 }
 
+/** True when every collected course reached the library, so the kit folder holds nothing worth keeping. */
+export function allUploaded(courses) {
+  return Object.values(courses).every(c => c.upload_result === 'uploaded');
+}
+
 const mb = bytes => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 function writeReceipt() {
@@ -197,7 +202,9 @@ async function main(argv) {
     console.log('Usage: kit.mjs login | collect [--dry] | upload | run   [--code <upload code>]');
     return 2;
   }
-  progress({ step: 'done', needs_friend: false, message: ok ? 'Finished' : 'Finished with problems: see receipt.txt' });
+  const uploadedAll = (step === 'run' || step === 'upload') && Boolean(readConfig().dropUrl)
+    && allUploaded(loadState(STATE_PATH).courses);
+  progress({ step: 'done', needs_friend: false, all_uploaded: uploadedAll, message: ok ? 'Finished' : 'Finished with problems: see receipt.txt' });
   return ok ? 0 : 1;
 }
 

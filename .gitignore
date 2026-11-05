@@ -5,3 +5,4 @@ output/
 progress.json
 receipt.txt
 *.tmp
+.browsers/

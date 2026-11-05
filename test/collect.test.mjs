@@ -10,6 +10,13 @@ import { collectWithClient } from '../lib/collect.mjs';
 import { fixtureClient } from '../lib/fixture-client.mjs';
 import { writeZip } from '../lib/zip.mjs';
 import { sha256Hex, sharer, localDate } from '../lib/contract.mjs';
+import { allUploaded } from '../kit.mjs';
+
+test('cleanup is allowed only when every course reached the library', () => {
+  assert.equal(allUploaded({ a: { upload_result: 'uploaded' }, b: { upload_result: 'uploaded' } }), true);
+  assert.equal(allUploaded({ a: { upload_result: 'uploaded' }, b: { upload_result: 'not uploaded: daily_limit' } }), false);
+  assert.equal(allUploaded({ a: {} }), false);
+});
 import { loadState, saveState } from '../lib/state.mjs';
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'kit-test-'));

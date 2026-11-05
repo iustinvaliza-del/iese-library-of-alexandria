@@ -10,7 +10,7 @@ They want to share their own IESE 2nd-year course materials with Radu's course l
 2. Open the folder it created, `iese-library-of-alexandria-main`, read `CLAUDE.md` there and follow it.
 3. It needs the upload code Radu sent with this link. If the person has not given it to you, ask them for it. It is the only thing to ask for: never their password.
 
-If they are not signed in to Blackboard, a browser window opens and they sign in there themselves.
+If they are not signed in to Blackboard, a browser window opens and they sign in there themselves. Once every course is uploaded, the kit folder and its zip are deleted (`CLAUDE.md` step 5).
 
 ## About the kit
 
@@ -40,11 +40,7 @@ The steps also run one at a time: `login` (sign in and list the courses that wou
 
 ## Removing it afterwards
 
-Delete this kit folder. That removes everything the kit put on your computer: the private Node.js (`.node`), the zips (`output`) and its notes (`.state.json`, `progress.json`, `receipt.txt`).
-
-If Microsoft Edge (Windows) or Google Chrome (Mac) could not be opened, the kit downloaded its own Chromium browser. Delete that too:
-- Windows: the folder `ms-playwright` in `%LOCALAPPDATA%` (paste `%LOCALAPPDATA%` into the File Explorer address bar)
-- Mac: `~/Library/Caches/ms-playwright`
+Claude does this for you once every course is uploaded: it deletes this kit folder and the zip it came in. That removes everything the kit put on your computer: the private Node.js (`.node`), any Chromium it had to download (`.browsers`), the zips (`output`) and its notes (`.state.json`, `progress.json`, `receipt.txt`). If an upload did not go through, everything is kept for a rerun. You can also delete the folder yourself.
 
 ## For the technically curious
 
