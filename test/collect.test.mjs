@@ -105,9 +105,10 @@ test('kit.mjs collect --dry lists the fixture courses and exits 0', () => {
   assert.doesNotMatch(output, /Corporate Finance|Class Community/);
 });
 
-test('kit.mjs upload with no drop configured says where the zips are and exits 0', () => {
-  const kit = fileURLToPath(new URL('../kit.mjs', import.meta.url));
-  assert.equal(JSON.parse(readFileSync(new URL('../kit.config.json', import.meta.url), 'utf-8')).dropUrl, '');
-  const output = execFileSync(process.execPath, [kit, 'upload'], { encoding: 'utf-8' });
-  assert.match(output, /^Upload drop not configured yet; your zips are in .*output$/m);
+test('kit.config.json points at an Apps Script web app over https', () => {
+  const { dropUrl } = JSON.parse(readFileSync(new URL('../kit.config.json', import.meta.url), 'utf-8'));
+  const url = new URL(dropUrl);
+  assert.equal(url.protocol, 'https:');
+  assert.equal(url.host, 'script.google.com');
+  assert.match(url.pathname, /^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/);
 });
