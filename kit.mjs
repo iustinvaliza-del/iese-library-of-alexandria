@@ -31,7 +31,10 @@ async function knownIds(code) {
   const { dropUrl } = readConfig();
   if (!dropUrl || !code) return [];
   try {
-    return await knownCourseIds(dropUrl, code);
+    // Called only to check the code before the browser opens. Every course is shared, even ones the library
+    // already has, because each person gets a full folder of their own (owner, 2026-11-05).
+    await knownCourseIds(dropUrl, code);
+    return [];
   } catch (e) {
     if (e instanceof DropError && e.error === 'bad_code') {
       throw new Error('The upload code was not accepted. Check the code in the message you were sent.');
@@ -73,7 +76,7 @@ async function stepLogin(context, known) {
   const skip = new Set(excludedIds(known));
   console.log(`2nd-year courses found: ${courses.length}`);
   for (const c of courses) {
-    console.log(`  ${skip.has(c.courseId) ? '[already shared or collected] ' : ''}${c.name} (${c.courseId})`);
+    console.log(`  ${skip.has(c.courseId) ? '[already collected by this kit] ' : ''}${c.name} (${c.courseId})`);
   }
 }
 
