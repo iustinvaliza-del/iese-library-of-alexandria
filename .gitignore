@@ -6,3 +6,5 @@ progress.json
 receipt.txt
 *.tmp
 .browsers/
+code.txt
+STATUS.txt
