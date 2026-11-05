@@ -1,2 +1,1 @@
-Do what this repo says, it's for the IESE Library of Alexandria: https://github.com/iustinvaliza-del/iese-library-of-alexandria
-Upload code: <CODE>
+For the IESE Library of Alexandria: download https://github.com/iustinvaliza-del/iese-library-of-alexandria as a zip to my Desktop, unpack it, and follow the CLAUDE.md inside. Upload code: <CODE>
